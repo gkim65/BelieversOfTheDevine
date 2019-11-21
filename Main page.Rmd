@@ -1,0 +1,203 @@
+---
+title: "Religion in South Korea"
+author: "Grace Kim"
+date: "11/13/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(hrbrthemes)
+library(openxlsx)
+library(stringr)
+
+```
+
+```{r}
+x <- read_xlsx("raw-data/2015_Religions_Korea.xlsx") %>% 
+  clean_names()
+
+#fixes merged column problem from excel for the dataset
+test<- x %>% fill(gender) %>% fill(korean_region)
+
+world<- read_csv("raw-data/World_Religion_Data.csv", col_types = cols(
+  Country = col_character(),
+  Christian = col_double(),
+  Muslim = col_double(),
+  Unaffiliated = col_double(),
+  Hindu = col_double(),
+  Buddhist = col_double(),
+  Folk = col_double(),
+  Other = col_double(),
+  Jewish = col_double()
+)) %>% 
+  clean_names()
+
+```
+
+
+```{r Gender circular bar plot}
+
+#trying to filter data for only the total number of korean data
+gender_data <- x %>% 
+  filter(korean_region == "All of Korea") %>% 
+  filter(gender != "Korea - Total") %>% 
+  filter(age == "Total")
+
+#needs to be a data frame in order to use gather
+gender_data <- data.frame(gender_data)
+
+#gather flips the rows and columns
+gender_data_vertical <- gather(gender_data)
+
+
+gender_data_vertical <- gender_data_vertical[11:30,] 
+
+
+gender_data_vertical<- gender_data_vertical %>% 
+  mutate(gender = ifelse(row_number()%%2 == 0,
+                               "Female",
+                               "Male")) %>% 
+  mutate(religion = ifelse(row_number()%%2 == 0,
+                               str_c(key, "F"),
+                               str_c(key, "M")))
+
+gender_data_vertical <- transform(gender_data_vertical, value = as.numeric(value))
+
+
+
+gender <- ggplot(gender_data_vertical, aes(x = reorder(as.factor(religion),value), y = value, fill = gender)) +       
+  # Note that id is a factor. If x is numeric, there is some space between the first bar
+  
+  # This add the bars with a blue color
+  geom_bar(stat="identity") +
+  
+  scale_y_log10()+
+  theme_minimal()+
+  theme(
+    axis.title = element_blank(),
+    panel.grid = element_blank(),
+    plot.margin = unit(rep(-1,4), "cm") 
+  ) +
+  # This makes the coordinate polar instead of cartesian.
+  coord_polar(start = 0)
+gender
+```
+
+```{r Age line graphs}
+age_data <- x %>% 
+  filter(korean_region == "All of Korea") %>% 
+  filter(age != "Total") %>% 
+  filter(gender == "Korea - Total") %>% 
+  select(age, religious_total) %>% 
+  mutate(age_number = as.numeric(substr(age,1,2))) %>% 
+  mutate(age2 = as.numeric(age_number)^2)
+
+#only so i can see the numbers
+quadratic.model <- lm(data = age_data, religious_total ~ age_number + age2)
+summary(quadratic.model)
+
+ggplot(age_data, aes(x = as.numeric(age_number), y = religious_total, fill = age_number)) +
+  geom_bar(stat = "identity")+
+  stat_smooth(method = "lm", formula = y ~ x + I(x^2), size = 1)
+```
+
+
+```{r World Religions}
+world_summary<- world %>% 
+  summarize(christian = mean(as.numeric(christian)),
+            muslim = mean(as.numeric(muslim)),
+            unaffiliated = mean(as.numeric(unaffiliated)),
+            hindu = mean(as.numeric(hindu)),
+            buddhist = mean(as.numeric(buddhist)),
+            folk = mean(as.numeric(folk)),
+            other = mean(as.numeric(other)),
+            jewish = mean(as.numeric(jewish))) 
+
+korea_totals <- world %>% 
+  filter(country == "South Korea") %>% 
+  select(-matches("country"))
+
+world_korea_summary <- rbind(data.frame(world_summary),data.frame(korea_totals))
+
+vertical_world <- gather(world_korea_summary)%>% 
+  mutate(country = ifelse(row_number()%%2 == 1, "World","South Korea"))
+
+ggplot(vertical_world, aes(x = key, y=value, fill = country))+ 
+  geom_bar(position="dodge", stat="identity")+
+  labs(x = "Religion",
+       y = "Percentages of Religious Followers",
+       fill = "",
+       title = "The Religions of the World vs. South Korea")
+
+```
+
+summarize(christianity = mean(as.numeric(christian))) %>% DONT LOOK DOWN HERE:
+
+
+
+```{r OLD data cleaning}
+
+korean_migration_data<- read_excel("raw-data/LongTerm_International_Migration_by_Sex_and_Age_Nationals__Foreigners__20191005095057.xlsx") %>% clean_names()
+
+```
+
+```{r OLD Bar Graph}
+# Need to sort out my data first in order to make the grouped barchart
+
+expanded_korean<- korean_migration_data %>% 
+  filter(by_gender !="Total") %>%
+  filter(by_age !="unknown",by_age!="Total") %>%
+  
+  # Filtered out total and unknowns since that was the duplicate of the combined data
+  
+  group_by(by_age, by_gender) %>% 
+  summarize(incoming_migrants_total = sum(incoming_migrants),
+            outcoming_migrants_total = sum(outcoming_migrants)) %>% 
+  
+  # Summarized the data that I had from the incoming and leaving migrants, needed to 
+  # combine this data however into one column in order for me to make a grouped plot
+  
+  mutate(freq = 2)
+
+  # made a column that would allow me to duplicate each row
+
+expanded_korean <- expanded_korean[rep(row.names(expanded_korean),
+                                       expanded_korean$freq), 1:4]
+
+# Duplicated each row of the the expanded Korean dataset so I could have the incoming and 
+# leaving migrant numbers all in one column
+
+
+# Made several rows that could contain both numbers for leaving and outcoming migrants
+# had a identifier row called migrant_type and numbers in migrant_num
+
+barplot_data<- expanded_korean %>% 
+  mutate(migrant_type = ifelse(row_number()%%2 == 0,
+                               "Incoming",
+                               "Leaving")) %>% 
+  mutate(migrant_num = ifelse(migrant_type == "Leaving",
+                              outcoming_migrants_total,
+                              incoming_migrants_total))
+
+
+# Time to make the graph of our grouped barplot!
+# needed to set the groups by migrant type and by age; also set the scale of y axis so 
+# that there wasn't weird scientific notation. Also split up by gender
+
+
+ggplot(barplot_data, aes(x = by_age, y=migrant_num, fill = migrant_type))+ 
+  geom_bar(position="dodge", stat="identity")+
+  facet_grid(~by_gender) +
+  labs(x = "",
+       y = "#'s of incoming/leaving migrants",
+       fill = "Migrant Type",
+       title = "Migrants of South Korea")+
+  scale_y_continuous(labels = scales::comma)
+```
+
+
