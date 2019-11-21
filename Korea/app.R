@@ -11,38 +11,53 @@ library(shiny)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-
-    # Application title
-    titlePanel("Believers in the Divine: The Religions of South Korea"),
-
-    # Sidebar with a slider input for number of bins 
-    sidebarLayout(
-        sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
-        ),
-
-        # Show a plot of the generated distribution
-        mainPanel(
-           plotOutput("distPlot")
-        )
-    )
-)
+    navbarPage("Believers in the Divine: The Religions of South Korea",
+    # Include an About” tab with name, contact information, GitHub repo and data
+    # source information.
+    tabPanel("Couple Characteristics",
+             tabsetPanel(
+                 
+                 # One of the first questions that came to my mind when playing around
+                 # with this dataset was one of earnings. Are women today still
+                 # overall making less than their partners?
+                 
+                 tabPanel("Earnings"))),
+        tabPanel("About",
+                 mainPanel(
+                     
+                     # Provide information about the project itself and data sources
+                     
+                     h3("The Data"),
+                     h5("These graphics were created based on data from both the Pew Research Center's", a("The Global Religious Landscape", href="https://www.pewforum.org/2012/12/18/global-religious-landscape-exec/"), " , as well as the KOSIS KOrean Statistical Information Service's ", a("2015 Gender/Age/Religion Survey", href="http://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1PM1502&conn_path=I2")),
+                     
+                     # Ensure that the minimum relevant background is provided to
+                     # understand what is being presented
+                     
+                     h5("As a first generation immigrant from South Korea, I wanted to explore more of the history and culture behind the traditions of the South Korean people. Learning about the religions of my home country made me realize many different influences from the west and the surviving cultural traditions of the Korean people."),
+                     h5("Due to the scope and timeframe of this project, it was not possible to explore all the various factors that could affect religion, but I was able to see the affects age, gender, and region could have on the various religions that individuals proacticed."),
+                     # Include information about me so they can know who wrote the project
+                     
+                     h3("About Me: Grace Kim"),
+                     h5("I am a Harvard undergraduate studying mechanical engineering and passionate about data and computer science."),
+                     h5("Contact me at gracekim@college.harvard.edu or connect with me on LinkedIn", a("HERE", href="https://www.linkedin.com/in/grace-k-767483132")),
+                     
+                     # Use the citation for the data provided by the authors to provide
+                     # proper credit
+                     
+                     h3("Citations"),
+                     h5("Table: Religious Composition by Country, in Percentages. (2017, November 16). Retrieved from https://www.pewforum.org/2012/12/18/table-religious-composition-by-country-in-percentages/."),
+                     h5("성별/연령별/종교별 인구-시군구. (2015, January 5). Retrieved from http://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1PM1502&conn_path=I2."),
+                     
+                     # Include a link to the Source Code for reproducibility and credibility
+                     
+                     h3("Source Code"),
+                     h5("The source code for this Shiny App can be found at my GitHub", a("HERE", href="https://github.com/gkim65/milestone_8"))
+                 ))
+    ))
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
 
-    output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white')
-    })
 }
 
 # Run the application 
