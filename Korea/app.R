@@ -9,19 +9,20 @@
 
 library(shiny)
 
+vertical_world =  read_rds("world.rds")
+
 # Define UI for application that draws a histogram
 ui <- fluidPage(
     navbarPage("Believers in the Divine: The Religions of South Korea",
+    
+    tabPanel("The World",
+             tabPanel("The World V.S. South Korea",
+                      mainPanel(
+                          plotOutput(outputId = "worldPlot")
+                      ))),
+    
     # Include an About” tab with name, contact information, GitHub repo and data
     # source information.
-    tabPanel("Couple Characteristics",
-             tabsetPanel(
-                 
-                 # One of the first questions that came to my mind when playing around
-                 # with this dataset was one of earnings. Are women today still
-                 # overall making less than their partners?
-                 
-                 tabPanel("Earnings"))),
         tabPanel("About",
                  mainPanel(
                      
@@ -57,7 +58,18 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-
+    
+    output$worldPlot <- renderPlot({
+        
+        ggplot(vertical_world, aes(x = key, y=value, fill = country))+ 
+            geom_bar(position="dodge", stat="identity")+
+            labs(x = "Religion",
+                 y = "Percentages of Religious Followers",
+                 fill = "",
+                 title = "The Religions of the World vs. South Korea")  
+    })    
+    
+    
 }
 
 # Run the application 
