@@ -12,7 +12,7 @@ library(janitor)
 # DATA CLEANING FOR THE GENDER PLOT!
 
 # Got the data for the official 2015 korean religions count data
-x <- read_xlsx("raw-data/2015_Religions_Korea.xlsx") %>% 
+x <- read_xlsx("Korea/raw-data/2015_Religions_Korea.xlsx") %>% 
   clean_names()
 
 #fixes merged column problem from excel for the dataset
@@ -65,7 +65,7 @@ age_data <- x %>%
 # database ; needed to specify the various columns for each variable
 # cleaned names to have useful labels for the graph
 
-world<- read_csv("raw-data/World_Religion_Data.csv", col_types = cols(
+world<- read_csv("Korea/raw-data/World_Religion_Data.csv", col_types = cols(
     Country = col_character(),
     Christian = col_double(),
     Muslim = col_double(),
