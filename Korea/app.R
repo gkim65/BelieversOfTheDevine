@@ -16,7 +16,6 @@ age_data =  read_rds("age.rds")
 # Define UI for application that draws a histogram
 ui <- fluidPage(
     navbarPage("Believers in the Divine: The Religions of South Korea",
-    
     tabPanel("The World",
         tabsetPanel(
              tabPanel("The World V.S. South Korea",
@@ -33,12 +32,20 @@ ui <- fluidPage(
                           plotOutput(outputId = "genderPlot")
                       )),
             tabPanel("Age",
-                     h3(""),
+                     h3("Religion distribution based on age"),
                      br(),
                      sidebarPanel(
-                         selectInput("age",
-                                     "Religion:", levels(age_data)),
-                     ),
+                         selectInput("variable",
+                                     "Religion:", 
+                                     (c("All Religions" = "religious_total",
+                                        "Buddhism" = "buddhism",
+                                        "Christianity Protestant" = "christianity_protestant",
+                                        "Christianity Catholic" = "christianity_catholic",
+                                        "Won Buddhism" = "won_buddhism",
+                                        "Confucianism" = "confucianism",
+                                        "Cheondoism" = "cheondoism",
+                                        "No Religion" = "no_religion"))
+                     )),
                      mainPanel(
                          plotOutput(outputId = "agePlot")
                      ),
@@ -84,9 +91,10 @@ ui <- fluidPage(
 server <- function(input, output) {
     
     output$agePlot <- renderPlot({
-        ggplot(age_data, aes(x = as.numeric(age_number), y = religious_total, fill = age_number)) +
-            geom_bar(stat = "identity")+
-            stat_smooth(method = "lm", formula = y ~ x + I(x^2), size = 1)
+            ggplot(age_data, aes(x = as.numeric(age_number), fill = age_number))+
+                aes_string(y = input$variable)+
+                geom_bar(stat = "identity")+
+                stat_smooth(method = "lm", formula = y ~ x + I(x^2), size = 1)
     })
     
     output$genderPlot <- renderPlot({
