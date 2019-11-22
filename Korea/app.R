@@ -21,9 +21,6 @@ ui <- fluidPage(
              tabPanel("The World V.S. South Korea",
                       mainPanel(
                           plotOutput(outputId = "worldPlot")
-                      )),
-             tabPanel("Major World Religions",
-                      mainPanel(
                       )))),
     tabPanel("Demographics and Religion",
         tabsetPanel(
