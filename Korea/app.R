@@ -10,16 +10,40 @@
 library(shiny)
 
 vertical_world =  read_rds("world.rds")
+gender_data_vertical =  read_rds("gender.rds")
+age_data =  read_rds("age.rds")
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
     navbarPage("Believers in the Divine: The Religions of South Korea",
     
     tabPanel("The World",
+        tabsetPanel(
              tabPanel("The World V.S. South Korea",
                       mainPanel(
                           plotOutput(outputId = "worldPlot")
-                      ))),
+                      )),
+             tabPanel("Major World Religions",
+                      mainPanel(
+                      )))),
+    tabPanel("Demographics and Religion",
+        tabsetPanel(
+             tabPanel("Gender",
+                      mainPanel(
+                          plotOutput(outputId = "genderPlot")
+                      )),
+            tabPanel("Age",
+                     h3(""),
+                     br(),
+                     sidebarPanel(
+                         selectInput("age",
+                                     "Religion:", levels(age_data)),
+                     ),
+                     mainPanel(
+                         plotOutput(outputId = "agePlot")
+                     ),
+                     )
+        )),
     
     # Include an About” tab with name, contact information, GitHub repo and data
     # source information.
@@ -58,6 +82,28 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+    
+    output$agePlot <- renderPlot({
+        ggplot(age_data, aes(x = as.numeric(age_number), y = religious_total, fill = age_number)) +
+            geom_bar(stat = "identity")+
+            stat_smooth(method = "lm", formula = y ~ x + I(x^2), size = 1)
+    })
+    
+    output$genderPlot <- renderPlot({
+        ggplot(gender_data_vertical, aes(x = reorder(as.factor(religion),value), y = value, fill = gender)) +       
+            
+            geom_bar(stat="identity") +
+            
+            scale_y_log10()+
+            theme_minimal()+
+            theme(
+                axis.title = element_blank(),
+                panel.grid = element_blank(),
+                plot.margin = unit(rep(-1,4), "cm") 
+            ) +
+            # This makes the coordinate polar instead of cartesian.
+            coord_polar(start = 0)
+    })
     
     output$worldPlot <- renderPlot({
         
