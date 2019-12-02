@@ -7,15 +7,135 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(leaflet)
+library(readr)
+library(nnet)
+library(rgdal)
+library(janitor)
+library(tidyverse)
+```
+
+
+```{r world map data cleaning}
+
+# Read in the world religion data
+world<- read_csv("Korea/raw-data/World_Religion_Data.csv", col_types = cols(
+  Country = col_character(),
+  Christian = col_double(),
+  Muslim = col_double(),
+  Unaffiliated = col_double(),
+  Hindu = col_double(),
+  Buddhist = col_double(),
+  Folk = col_double(),
+  Other = col_double(),
+  Jewish = col_double()
+)) %>% 
+  clean_names()
+
+# added a column to this data that notes which religion is the highest for each country
+# saved into a new data set that will have only country names and the religions
+world_clean <- world %>% 
+  mutate(highest_religion = apply(world[,-(1)],1,which.max)) %>% 
+  select(country,highest_religion)
+
+# change column names to join with other data set later
+colnames(world)[1]<-"NAME"
+
+# Read this shape file with the rgdal library. 
+world_spdf <- readOGR("Korea/raw-data/world_shape_file/TM_WORLD_BORDERS_SIMPL-0.3.shp", stringsAsFactors = F)
+world_spdf@data[world_spdf@data$ISO2 == "AX","NAME"] <- "Aland Islands"
+
+world_spdfog <- readOGR("Korea/raw-data/world_shape_file/TM_WORLD_BORDERS_SIMPL-0.3.shp", stringsAsFactors = F)
+
+world_spdf@data <- inner_join(world_spdf@data,world,by = "NAME")
+
+```
+
+```{r mappy time}
+pal <- colorNumeric("YlGnBu", world_spdf@data$christian)
+
+mytext <- paste(
+    "Country: ", world_spdf@data$NAME,"<br/>", 
+    "Religion: ", world_spdf@data$christian, "<br/>", 
+    "Population: ", round(as.numeric(as.character(world_spdf@data$POP2005)), 2), 
+    sep="") %>%
+  lapply(htmltools::HTML)
+
+leaflet(world_spdf)%>% 
+  addTiles()%>%
+  setView(lat=10, lng=0 , zoom=2) %>%
+  addPolygons(stroke = FALSE, 
+              fillOpacity = 0.9, 
+              smoothFactor = 0.5, 
+              color = ~pal(christian),
+              label = mytext,
+              labelOptions = labelOptions( 
+                style = list("font-weight" = "normal", padding = "3px 8px"), 
+                textsize = "13px", 
+                direction = "auto"
+            )) %>% 
+  addLegend("bottomright", 
+            pal = pal, 
+            values = ~christian,
+            title = "Religion",
+            opacity = 1)
+
+
+
 ```
 
 ```{r}
-library(leaflet)
+world_spdfog@data$POP2005[ which(world_spdfog@data$POP2005 == 0)] = NA
+world_spdfog@data$POP2005 <- as.numeric(as.character(world_spdfog@data$POP2005)) / 1000000 %>% round(2)
+pal <- colorNumeric("YlGnBu", world_spdfog@data$POP2005)
 
-# Initialize the leaflet map with the leaflet() function
-m <- leaflet()
-# Then we Add default OpenStreetMap map tiles
-m <- addTiles(m)
-m
+mytext <- paste(
+    "Country: ", world_spdfog@data$NAME,"<br/>", 
+    "Population: ", round(as.numeric(as.character(world_spdfog@data$POP2005)), 2), 
+    sep="") %>%
+  lapply(htmltools::HTML)
+
+leaflet(world_spdfog)%>% 
+  addTiles()%>%
+  setView(lat=10, lng=0 , zoom=2) %>%
+  addPolygons(stroke = FALSE, 
+              fillOpacity = 0.9, 
+              smoothFactor = 0.5, 
+              color = ~pal(POP2005),
+              label = mytext,
+              labelOptions = labelOptions( 
+                style = list("font-weight" = "normal", padding = "3px 8px"), 
+                textsize = "13px", 
+                direction = "auto"
+            )) %>% 
+  addLegend("bottomright", 
+            pal = pal, 
+            values = ~POP2005,
+            title = "Religion",
+            opacity = 1)
+
+```
+
+
+```{r}
+world_spdfog@data$NAME[!( world_spdfog@data$NAME %in% world$NAME)]
+world_spdfog@data[141,"NAME"] <- "Aland Islands"
+
+> world_spdfog@data[world_spdfog@data$ISO2 == "AX","NAME"] <- "Aland Islands"
+
+summary(world_spdfog@data$NAME)
+summary(world_spdf@data$NAME)
+
+
+output$worldMapPlot <- renderLeaflet({map %>%
+            setView(lat=10, lng=0, zoom=3)%>%
+            addPolygons(stroke = FALSE, 
+                        fillOpacity = 0.5, 
+                        smoothFactor = 0.5, 
+                        color = ~colorNumeric("YlOrRd", colorReligion)(colorReligion))%>%
+            addLegend("bottomleft", 
+                       pal = ~colorNumeric("YlOrRd", colorReligion),
+                       values = ~colorReligion)
 ```
 

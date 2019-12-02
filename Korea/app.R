@@ -5,7 +5,10 @@
 
 library(shiny)
 library(readr)
+library(nnet)
+library(rgdal)
 library(tidyverse)
+library(leaflet)
 
 # Need to download the various data files for the various graphs 
 # have the world data rds file, the filtered out gender data rds file, as well as
@@ -14,6 +17,16 @@ library(tidyverse)
 vertical_world =  read_rds("world.rds")
 gender_data_vertical =  read_rds("gender.rds")
 age_data =  read_rds("age.rds")
+world = read_rds("worldMap.rds")
+
+# change column names to join with other data set later
+colnames(world)[1]<-"NAME"
+
+# Read this shape file with the rgdal library. 
+world_spdf <- readOGR("raw-data/world_shape_file/TM_WORLD_BORDERS_SIMPL-0.3.shp", stringsAsFactors = F)
+world_spdf@data[world_spdf@data$ISO2 == "AX","NAME"] <- "Aland Islands"
+
+world_spdf@data <- inner_join(world_spdf@data,world,by = "NAME")
 
 # Define UI for application that contains the plots and charts of our various
 # graphs based upon the world and gender
@@ -29,17 +42,54 @@ ui <- fluidPage(
     
     tabPanel("The World",
              
-        # Have a mini panel set within the main world tab so I can add more 
-        # graphs in the future
+        # Have a mini panel set within the main world tab to have both mapping
+        # and graphs be shown
         
         tabsetPanel(
+            
+            # Religion mapping tab for the world page
+            
+            tabPanel("Interactive Religion Mapping",
+                     
+                     
+                     # Have my little title here:
+                     
+                     h3("Distributions of Religions by Country"),
+                     br(),
+                     
+                     
+                     leafletOutput("worldMapPlot", width = "auto", height = "550"),
+                     # Has a select input function to choose which religion to try
+                     # mapping
+                     absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
+                                   draggable = TRUE, top = 250, left = "auto", right = 20,width = 330,
+                         selectInput("region",
+                                     "Religion:", 
+                                     
+                                     # Needed to specify the various religions you can
+                                     # choose, had them equal the various variables for
+                                     # in age data
+                                     
+                                     (c("Christian" = "christian",
+                                        "Muslim" = "muslim",
+                                        "Unaffiliated" = "unaffiliated",
+                                        "Hindu" = "hindu",
+                                        "Buddhist" = "buddhist",
+                                        "Folk" = "folk",
+                                        "Other" = "other",
+                                        "Jewish" = "jewish"))
+                         )))
+                    ,
+                        
+            
              tabPanel("The World V.S. South Korea",
                       
                       # Only one graph within this panel
                       
                       mainPanel(
                           plotOutput(outputId = "worldPlot")
-                      )))),
+                      ))
+             )),
     
     # Second main tab for Korean Demographics data compared with religion
     
@@ -133,8 +183,54 @@ ui <- fluidPage(
 
 # Define server logic required to draw out all of our graphs from the rds data
 
-server <- function(input, output) {
+server <- function(input, output, session) {
+
+    # GRAPH FOR THE RELIGION MAPPING FUNCTION DATA
     
+    # Needed a leaflet to make the world map highlighting the various countries
+    # Got the input variable from the select tool from the app
+    # needed to use aes_string since the input only gives out a string
+    
+    map = leaflet(world_spdf)%>% 
+        addTiles()
+
+    
+    observe({
+        colorReligion <- world_spdf[[input$region]]
+        
+            pal <- colorNumeric("YlGnBu", colorReligion)
+            
+            mytext <- paste(
+                "Country: ", world_spdf@data$NAME,"<br/>", 
+                "Religion: ", colorReligion, "<br/>", 
+                "Population: ", round(as.numeric(as.character(world_spdf@data$POP2005)), 2), 
+                sep="") %>%
+                lapply(htmltools::HTML)
+            
+            output$worldMapPlot <- renderLeaflet({map %>%
+                addTiles()%>%
+                setView(lat=10, lng=0 , zoom=2) %>%
+                addPolygons(stroke = FALSE, 
+                            fillOpacity = 0.9, 
+                            smoothFactor = 0.5, 
+                            color = ~pal(colorReligion),
+                            label = mytext,
+                            labelOptions = labelOptions( 
+                                style = list("font-weight" = "normal", padding = "3px 8px"), 
+                                textsize = "13px", 
+                                direction = "auto"
+                            )) %>% 
+                addLegend("bottomright", 
+                          pal = pal, 
+                          values = ~colorReligion,
+                          title = "Religion",
+                          opacity = 1)    
+            
+        
+    })
+    })
+    
+
     # GRAPH FOR THE AGE SELECT FUNCTION DATA
     
     output$agePlot <- renderPlot({
@@ -148,6 +244,8 @@ server <- function(input, output) {
                 geom_bar(stat = "identity")+
                 stat_smooth(method = "lm", formula = y ~ x + I(x^2), size = 1)
     })
+    
+    
     
     # GRAPH OF GENDER PLOT DATA
     

@@ -3,8 +3,12 @@
 # doownloaded our various libraries
 
 library(sf)
+library(leaflet)
+library(readr)
 library(readxl)
 library(tidyverse)
+library(nnet)
+library(rgdal)
 library(janitor)
 
 ##############################################################
@@ -110,8 +114,10 @@ world_korea_summary <- rbind(data.frame(world_summary),data.frame(korea_totals))
 vertical_world <- gather(world_korea_summary)%>% 
   mutate(country = ifelse(row_number()%%2 == 1, "World","South Korea"))
 
+######################################################################
+
 #Used write_rds() to write out vertical world data into a separate rds file
 write_rds(vertical_world, "Korea/world.rds")
 write_rds(gender_data_vertical, "Korea/gender.rds")
 write_rds(age_data, "Korea/age.rds")
-
+write_rds(world, "Korea/worldMap.rds")
