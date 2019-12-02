@@ -1,0 +1,61 @@
+---
+title: "practice"
+author: "Grace Kim"
+date: "11/28/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(rgdal)
+library(ggplot2)
+library(dplyr)
+library(broom)
+library(readxl)
+library(janitor)
+```
+```{r Data cleaning}
+# read in the korea religions dataset :D
+x <- read_xlsx("Korea/raw-data/2015_Religions_Korea.xlsx") %>% 
+  clean_names()
+
+clean <- x %>% 
+  filter(gender == "Total") %>% 
+  tail(17) %>% 
+  select(-matches("age")) %>% 
+  select(-matches("gender"))
+
+colnames(clean)[1]<-"id"
+
+clean
+############################################################# 
+############### START OF SHAPEFILE STUFF ####################
+#############################################################
+
+
+# Read in Shape files of the korean administrative area boundaries
+shp <- readOGR("Korea/raw-data/KOR_adm/KOR_adm1.shp", stringsAsFactors = F)
+
+# tidyed the data for the region :D, need the region name so that the longitude data points match up the various busan seoul other area names 
+shp_df<- tidy(shp, region = "NAME_1")
+head(shp_df)
+
+joined <- inner_join(shp_df,clean, by = "id")
+joined
+```
+
+
+```{r Mapping}
+# geom polygon to plot the graph in ggplot :D
+# filled by id which we found through head, just the different regions of korea
+ggplot() + geom_polygon(data = joined, aes(x = long, y = lat, group = group, fill = as.numeric(extra)), colour = "black") + scale_fill_gradient2(low = "red",
+                                mid = scales::muted("purple"),
+                                high = "blue") +
+    labs(title = "Number of extra religion people based on korean region")
+
+
+
+shp@data
+
+```
+

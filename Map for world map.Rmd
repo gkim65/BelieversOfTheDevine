@@ -1,0 +1,21 @@
+---
+title: "Map for world map"
+author: "Grace Kim"
+date: "11/30/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(leaflet)
+
+# Initialize the leaflet map with the leaflet() function
+m <- leaflet()
+# Then we Add default OpenStreetMap map tiles
+m <- addTiles(m)
+m
+```
+
