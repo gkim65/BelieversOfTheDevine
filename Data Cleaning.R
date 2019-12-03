@@ -79,7 +79,8 @@ world<- read_csv("Korea/raw-data/World_Religion_Data.csv", col_types = cols(
     Folk = col_double(),
     Other = col_double(),
     Jewish = col_double())) %>% 
-  clean_names()
+  clean_names() %>% 
+  na.exclude()
 
 # Need to clean up my data sources to have only the overall world totals data
 # utilized summarize function in order to get totals of every single religion; 
@@ -100,7 +101,7 @@ world_summary<- world %>%
 # Took out the country column as it was unncecessary
 
 korea_totals <- world %>% 
-  filter(country == "South Korea") %>% 
+  filter(country == "Korea, Republic of") %>% 
   select(-matches("country"))
 
 # Merged the world data with the korea totals data in order to make a plot that could 

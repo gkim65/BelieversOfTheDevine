@@ -9,6 +9,7 @@ library(nnet)
 library(rgdal)
 library(tidyverse)
 library(leaflet)
+library(scales)
 
 # Need to download the various data files for the various graphs 
 # have the world data rds file, the filtered out gender data rds file, as well as
@@ -57,13 +58,20 @@ ui <- fluidPage(
                      h3("Distributions of Religions by Country"),
                      br(),
                      
+                     # The leaflet map that spans across the whole panel
                      
                      leafletOutput("worldMapPlot", width = "auto", height = "550"),
+                     
                      # Has a select input function to choose which religion to try
                      # mapping
-                     absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
-                                   draggable = TRUE, top = 250, left = "auto", right = 20,width = 330,
-                         selectInput("region",
+                     # inside an absolute panel so the user can drag it to wherever
+                     # they would like to see it, located at bottom left for now
+                     absolutePanel(bottom = 20, left = 40, width = 300,
+                                   draggable = TRUE,
+                                   wellPanel(
+                                   h3("Religion makeup based on country"),
+                                   
+                                   selectInput("region",
                                      "Religion:", 
                                      
                                      # Needed to specify the various religions you can
@@ -77,18 +85,27 @@ ui <- fluidPage(
                                         "Buddhist" = "buddhist",
                                         "Folk" = "folk",
                                         "Other" = "other",
-                                        "Jewish" = "jewish"))
-                         )))
+                                        "Jewish" = "jewish"))),
+                                   
+                                   h5("The decimal values of the religion for each country represent the percentage of how many people in that nation practice that specific religion."),
+                                   h5("You can zoom in, zoom out, and move the world map with your cursor; in addition, you can choose which religion you want mapped on the world map by choosing one of the religions on the dropdown selector. Individual statistics of each country can be seen by hovering on a specific nation.")
+                         ),
+                         style = "opacity: 0.92"
+                         ))
                     ,
                         
             
              tabPanel("The World V.S. South Korea",
                       
                       # Only one graph within this panel
+                          h2("The Religions of the World vs. South Korea"),
+                          plotOutput(outputId = "worldPlot"),
                       
-                      mainPanel(
-                          plotOutput(outputId = "worldPlot")
-                      ))
+                      # Need to give a slight explanation
+                      
+                      h4("Each of the major world religions and the prevalance of each in the world and South Korea are listed above in the graphic. The world percentages were calculated based on the percentages makeup of each nation. Thus, each nation was treated at an equal level, which is not representative of the number of religious followers by population."),
+                      h4("However, this percentage representation lets us compare South Korea to the other religous makeups for each nation. Interesting observations in the data are the large numbers of unaffiliated individuals with religion in South Korea in contrast to the rest of the nations in the world. There is also a large Buddhist population, which is understandable seeing as South Korea is in the region of East Asia; there is also a large population of Christian individuals, but not to the similar extent of the Christian populations in the rest of the world.")
+                      )
              )),
     
     # Second main tab for Korean Demographics data compared with religion
@@ -281,10 +298,16 @@ server <- function(input, output, session) {
         
         ggplot(vertical_world, aes(x = key, y=value, fill = country))+ 
             geom_bar(position="dodge", stat="identity")+
-            labs(x = "Religion",
-                 y = "Percentages of Religious Followers",
-                 fill = "",
-                 title = "The Religions of the World vs. South Korea")  
+            labs(fill = "",
+                 title = "Based on percentage makeup of religious following in each nation")+
+            scale_x_discrete(name="Religion", labels = c("Buddhist", "Christian", "Folk", "Hindu", "Jewish", "Muslim", "Other", "Unaffiliated"))+
+            scale_y_continuous(name = "Percentages of Religious Followers", breaks = c(0.2,0.4,0.6), labels = c("20%", "40%", "60%"))+
+            scale_fill_brewer(palette="Paired")+
+            theme_minimal()+
+            geom_text(aes(label=percent(round(value, digits = 3))), vjust=-0.2, color="Black",
+                      position = position_dodge(0.9), size=3.5)
+        
+            
     })    
     
     

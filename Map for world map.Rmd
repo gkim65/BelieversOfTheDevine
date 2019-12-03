@@ -138,4 +138,15 @@ output$worldMapPlot <- renderLeaflet({map %>%
                        pal = ~colorNumeric("YlOrRd", colorReligion),
                        values = ~colorReligion)
 ```
+```{r}
+
+vertical_world =  read_rds("Korea/world.rds")
+
+ggplot(vertical_world, aes(x = key, y=value, fill = country))+ 
+            geom_bar(position="dodge", stat="identity")+
+            labs(x = "Religion",
+                 y = "Percentages of Religious Followers",
+                 fill = "",
+                 title = "The Religions of the World vs. South Korea")  
+```
 
