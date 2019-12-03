@@ -13,7 +13,11 @@ library(dplyr)
 library(broom)
 library(readxl)
 library(janitor)
+library(cartogram)
+library(scales)
 ```
+
+
 ```{r Data cleaning}
 # read in the korea religions dataset :D
 x <- read_xlsx("Korea/raw-data/2015_Religions_Korea.xlsx") %>% 
@@ -41,21 +45,197 @@ shp_df<- tidy(shp, region = "NAME_1")
 head(shp_df)
 
 joined <- inner_join(shp_df,clean, by = "id")
-joined
+#shp@data <- inner_join(shp@data,clean, by = "NAME_1")
+#shp@data
 ```
 
 
+
 ```{r Mapping}
+png("Korea/graphics/populationKorea.png")
+png("Korea/graphics/allReligionsKorea.png")
+png("Korea/graphics/buddhismKorea.png")
+png("Korea/graphics/christProtesKorea.png")
+png("Korea/graphics/christCathKorea.png")
+png("Korea/graphics/wonBuddhismKorea.png")
+png("Korea/graphics/confucianismKorea.png")
+png("Korea/graphics/cheondoismKorea.png")
+png("Korea/graphics/noReligionKorea.png")
+
+
 # geom polygon to plot the graph in ggplot :D
 # filled by id which we found through head, just the different regions of korea
-ggplot() + geom_polygon(data = joined, aes(x = long, y = lat, group = group, fill = as.numeric(extra)), colour = "black") + scale_fill_gradient2(low = "red",
-                                mid = scales::muted("purple"),
-                                high = "blue") +
-    labs(title = "Number of extra religion people based on korean region")
+ggplot() + 
+  geom_polygon(data = joined, 
+               aes(x = long, 
+                  y = lat, 
+                  group = group, 
+                  fill = as.numeric(total)), 
+               colour = "white",
+               size=0, 
+               alpha=0.9) + 
+  scale_fill_gradient2(low = "red",
+                       mid = scales::muted("purple"),
+                       high = "blue",
+                       labels = comma) +
+  theme_void() +
+  labs(title = "South Korea population density based on geographic region",
+       fill = "Population")
+ggsave("Korea/graphics/populationKorea.png")
+
+# Religious Total
+ggplot() + 
+  geom_polygon(data = joined, 
+               aes(x = long, 
+                  y = lat, 
+                  group = group, 
+                  fill = as.numeric(religious_total)), 
+               colour = "white",
+               size=0, 
+               alpha=0.9) + 
+  scale_fill_gradient2(low = "red",
+                       mid = scales::muted("purple"),
+                       high = "blue",
+                       labels = comma) +
+  theme_void() +
+  labs(title = "Population of religious individuals based on geographic region",
+       fill = "Population")
+ggsave("Korea/graphics/allReligionsKorea.png")
+
+# Buddhism map
+ggplot() + 
+  geom_polygon(data = joined, 
+               aes(x = long, 
+                  y = lat, 
+                  group = group, 
+                  fill = as.numeric(buddhism)), 
+               colour = "white",
+               size=0, 
+               alpha=0.9) + 
+  scale_fill_gradient2(low = "red",
+                       mid = scales::muted("purple"),
+                       high = "blue",
+                       labels = comma) +
+  theme_void() +
+  labs(title = "Population of Buddhists based on geographic region",
+       fill = "Population")
+ggsave("Korea/graphics/buddhismKorea.png")
+
+# Christian Protestant map
+ggplot() + 
+  geom_polygon(data = joined, 
+               aes(x = long, 
+                  y = lat, 
+                  group = group, 
+                  fill = as.numeric(christianity_protestant)), 
+               colour = "white",
+               size=0, 
+               alpha=0.9) + 
+  scale_fill_gradient2(low = "red",
+                       mid = scales::muted("purple"),
+                       high = "blue",
+                       labels = comma) +
+  theme_void() +
+  labs(title = "Population of Protestant Christians based on geographic region",
+       fill = "Population")
+ggsave("Korea/graphics/christProtesKorea.png")
+
+# Christian Catholic map
+ggplot() + 
+  geom_polygon(data = joined, 
+               aes(x = long, 
+                  y = lat, 
+                  group = group, 
+                  fill = as.numeric(christianity_catholic)), 
+               colour = "white",
+               size=0, 
+               alpha=0.9) + 
+  scale_fill_gradient2(low = "red",
+                       mid = scales::muted("purple"),
+                       high = "blue",
+                       labels = comma) +
+  theme_void() +
+  labs(title = "Population of Catholic Christians based on geographic region",
+       fill = "Population")
+ggsave("Korea/graphics/christCathKorea.png")
+
+# Won Buddhism map
+ggplot() + 
+  geom_polygon(data = joined, 
+               aes(x = long, 
+                  y = lat, 
+                  group = group, 
+                  fill = as.numeric(won_buddhism)), 
+               colour = "white",
+               size=0, 
+               alpha=0.9) + 
+  scale_fill_gradient2(low = "red",
+                       mid = scales::muted("purple"),
+                       high = "blue",
+                       labels = comma) +
+  theme_void() +
+  labs(title = "Population of Won Buddhists based on geographic region",
+       fill = "Population")
+ggsave("Korea/graphics/wonBuddhismKorea.png")
+
+# Confucianism map
+ggplot() + 
+  geom_polygon(data = joined, 
+               aes(x = long, 
+                  y = lat, 
+                  group = group, 
+                  fill = as.numeric(confucianism)), 
+               colour = "white",
+               size=0, 
+               alpha=0.9) + 
+  scale_fill_gradient2(low = "red",
+                       mid = scales::muted("purple"),
+                       high = "blue",
+                       labels = comma) +
+  theme_void() +
+  labs(title = "Population of Confucianists based on geographic region",
+       fill = "Population")
+ggsave("Korea/graphics/confucianismKorea.png")
 
 
+# Confucianism map
+ggplot() + 
+  geom_polygon(data = joined, 
+               aes(x = long, 
+                  y = lat, 
+                  group = group, 
+                  fill = as.numeric(cheondoism)), 
+               colour = "white",
+               size=0, 
+               alpha=0.9) + 
+  scale_fill_gradient2(low = "red",
+                       mid = scales::muted("purple"),
+                       high = "blue",
+                       labels = comma) +
+  theme_void() +
+  labs(title = "Population of Cheondoists based on geographic region",
+       fill = "Population")
+ggsave("Korea/graphics/cheondoismKorea.png")
 
-shp@data
+
+# no religion map
+ggplot() + 
+  geom_polygon(data = joined, 
+               aes(x = long, 
+                  y = lat, 
+                  group = group, 
+                  fill = as.numeric(no_religion)), 
+               colour = "white",
+               size=0, 
+               alpha=0.9) + 
+  scale_fill_gradient2(low = "red",
+                       mid = scales::muted("purple"),
+                       high = "blue",
+                       labels = comma) +
+  theme_void() +
+  labs(title = "Population of non-religious individuals based on geographic region",
+       fill = "Population")
+ggsave("Korea/graphics/noReligionKorea.png")
 
 ```
 

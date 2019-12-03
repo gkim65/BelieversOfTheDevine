@@ -6,10 +6,13 @@
 library(shiny)
 library(readr)
 library(nnet)
+library(dplyr)
 library(rgdal)
 library(tidyverse)
 library(leaflet)
 library(scales)
+library(shinythemes)
+
 
 # Need to download the various data files for the various graphs 
 # have the world data rds file, the filtered out gender data rds file, as well as
@@ -19,7 +22,9 @@ vertical_world =  read_rds("world.rds")
 gender_data_vertical =  read_rds("gender.rds")
 age_data =  read_rds("age.rds")
 world = read_rds("worldMap.rds")
+joined = read_rds("koreaMap.rds")
 
+    
 # change column names to join with other data set later
 colnames(world)[1]<-"NAME"
 
@@ -32,7 +37,7 @@ world_spdf@data <- inner_join(world_spdf@data,world,by = "NAME")
 # Define UI for application that contains the plots and charts of our various
 # graphs based upon the world and gender
 
-ui <- fluidPage(
+ui <- fluidPage(theme = shinytheme("flatly"),
     
     # Need to provide the main title within our shiny app
     
@@ -117,11 +122,16 @@ ui <- fluidPage(
         tabsetPanel(
             
              tabPanel("Gender",
+                      fluidRow(
+                          style = "max-height: 80vh; overflow-y: auto;", 
+                      # Made a gender proportional bar graph plot 
+                      h3("Male and Female Religous Data"),
+                      plotOutput(outputId = "genderPlot"),
                       
-                      # Made a gender circular bar graph plot 
+                      # And a number representative bar graph plot
                       
-                      mainPanel(
-                        plotOutput(outputId = "genderPlot")
+                      plotOutput(outputId = "gender2Plot")
+                      
                       )),
              
             tabPanel("Age",
@@ -146,9 +156,6 @@ ui <- fluidPage(
                                         "Buddhism" = "buddhism",
                                         "Christianity Protestant" = "christianity_protestant",
                                         "Christianity Catholic" = "christianity_catholic",
-                                        "Won Buddhism" = "won_buddhism",
-                                        "Confucianism" = "confucianism",
-                                        "Cheondoism" = "cheondoism",
                                         "No Religion" = "no_religion"))
                      )),
                      
@@ -157,16 +164,42 @@ ui <- fluidPage(
                      
                      mainPanel(
                          plotOutput(outputId = "agePlot")
-                     ),
                      )
+                     ),
+                tabPanel("Geographic Regions of South Korea",
+
+                               selectInput("imageMap",
+                                           "Religion:", 
+                                           
+                                           # Needed to specify the various religions you can
+                                           # choose, had them equal the various variables for
+                                           # the names of the images of each map
+                                           
+                                           (c("All Religions" = "graphics/allReligionsKorea.png",
+                                              "Buddhism" = "graphics/buddhismKorea.png",
+                                              "Christianity Protestant" = "graphics/christProtesKorea.png",
+                                              "Christianity Catholic" = "graphics/christCathKorea.png",
+                                              "Won Buddhism" = "graphics/wonBuddhismKorea.png",
+                                              "Confucianism" = "graphics/confucianismKorea.png",
+                                              "Cheondoism" = "graphics/cheondoismKorea.png",
+                                              "No Religion" = "graphics/noReligionKorea.png"))
+                               ),
+                               
+                               h5("Choose from this dropdown menu to explore the religious makeup of the various administrative regions in South Korea."),
+                         
+                         fillPage(fillRow(imageOutput("imagePop"),
+                                          imageOutput("imageReligions")
+                         ))
+                           
+                         
+                )
         )),
     
     # Included an About” tab with name, contact information, GitHub repo and data
     # source information.
     
         tabPanel("About",
-                 mainPanel(
-                     
+
                      # Provided information about the project itself and data sources
                      
                      h3("The Data"),
@@ -195,7 +228,7 @@ ui <- fluidPage(
                      
                      h3("Source Code"),
                      h5("The source code for this Shiny App can be found at my GitHub", a("HERE", href="https://github.com/gkim65/milestone_8"))
-                 ))
+                 )
     ))
 
 # Define server logic required to draw out all of our graphs from the rds data
@@ -259,7 +292,10 @@ server <- function(input, output, session) {
             ggplot(age_data, aes(x = as.numeric(age_number), fill = age_number))+
                 aes_string(y = input$variable)+
                 geom_bar(stat = "identity")+
-                stat_smooth(method = "lm", formula = y ~ x + I(x^2), size = 1)
+            labs(x = "Age", y = "Population Per Religion")+
+            stat_smooth(method = "lm", formula = y ~ x + I(x^2), size = 1)+
+            scale_y_continuous(limits = c(0,2500000),labels = comma)+
+            theme(legend.position = "none") 
     })
     
     
@@ -268,26 +304,56 @@ server <- function(input, output, session) {
     
     output$genderPlot <- renderPlot({
         
-        # ggplot of the gender graph, a circular bar graph for bot hmale and female genders
+        # Percentage wise values to compare between males and females who practice more religion
         
-        ggplot(gender_data_vertical, aes(x = reorder(as.factor(religion),value), y = value, fill = gender)) +       
-            
-            # need to set stat as identity so we use the actual y values of the 
-            # bar plot; scaled y by log in order to have all of the various values be 
-            # represented on the graph
-            
-            geom_bar(stat="identity") +
-            scale_y_log10()+
-            theme_minimal()+
-            theme(
-                axis.title = element_blank(),
-                panel.grid = element_blank(),
-                plot.margin = unit(rep(-1,4), "cm") 
-            ) +
-            
-            # This makes the coordinate polar instead of cartesian.
-            
-            coord_polar(start = 0)
+        ggplot(gender_data_vertical,aes(x =key, y = value, fill = gender)) +
+            geom_bar(stat = "identity",position="fill") +
+            coord_flip() +
+            geom_hline(yintercept = 0.5) +
+            scale_fill_manual(values = c("#FF5733","#15C9C1")) +
+            scale_x_discrete(name="Religion", labels = c("Buddhism", 
+                                                         "Cheondoism", 
+                                                         "Christianity Catholic", 
+                                                         "Christianity Protestant", 
+                                                         "Confucianism",
+                                                         "Daesun Truth Association", 
+                                                         "Extra", 
+                                                         "No Religion", 
+                                                         "Unknown", 
+                                                         "Won Buddhism"))+
+            labs(title = "Percentage Based Representation", x = "Religions", y = "Percentage Practiced by Population")
+    })
+    
+    # MORE GRAPHS FOR GENDER PLOTTING DATA
+    output$gender2Plot <- renderPlot({
+        
+    ggplot(gender_data_vertical,aes(x = reorder(as.factor(religion),value), y = value, fill = gender)) +
+        geom_bar(stat = "identity") +
+        coord_flip() +
+        scale_fill_manual(values = c("#FF5733","#15C9C1")) +
+        scale_x_discrete(name="Religion", labels = c("Unknown", 
+                                                     "Unknown", 
+                                                     "Daesun Truth", 
+                                                     "Daesun Truth", 
+                                                     "Cheondoism", 
+                                                     "Confucianism", 
+                                                     "Won Buddhism", 
+                                                     "Cheondoism", 
+                                                     "Extra",
+                                                     "Confucianism",
+                                                     "Won Buddhism",
+                                                     "Extra",
+                                                     "Christianity Catholic",
+                                                     "Christianity Catholic",
+                                                     "Buddhism",
+                                                     "Buddhism",
+                                                     "Christianity Protestant",
+                                                     "Christianity Protestant",
+                                                     "No Religion", 
+                                                     "No Religion"
+                                                     ))+
+            scale_y_continuous(labels = comma)+
+        labs(title = "Population Based Representation", x = "Religions", y = "Population that practices Religion")
     })
     
     # GRAPH OF THE WORLD VS KOREA PLOT
@@ -310,7 +376,17 @@ server <- function(input, output, session) {
             
     })    
     
+
+    output$imagePop <- renderImage(
+        #changed the code to my gif
+        list(src = "graphics/populationKorea.png",width="100%"),
+        deleteFile = FALSE)
     
+    output$imageReligions <- renderImage(
+        #changed the code to my gif
+        list(src = as.character(input$imageMap),width="100%"),
+        deleteFile = FALSE)
+
 }
 
 # Run the application 

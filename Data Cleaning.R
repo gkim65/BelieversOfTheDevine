@@ -117,8 +117,36 @@ vertical_world <- gather(world_korea_summary)%>%
 
 ######################################################################
 
+# KOREA MAP DATA WRANGLING
+# used the korea religions dataset :D
+
+clean <- x %>% 
+  filter(gender == "Total") %>% 
+  tail(17) %>% 
+  select(-matches("age")) %>% 
+  select(-matches("gender"))
+
+colnames(clean)[1]<-"id"
+
+############################################################# 
+############### START OF SHAPEFILE STUFF ####################
+#############################################################
+
+
+# Read in Shape files of the korean administrative area boundaries
+shp <- readOGR("Korea/raw-data/KOR_adm/KOR_adm1.shp", stringsAsFactors = F)
+
+# tidyed the data for the region :D, need the region name so that the longitude data points match up the various busan seoul other area names 
+shp_df<- tidy(shp, region = "NAME_1")
+head(shp_df)
+
+joined <- inner_join(shp_df,clean, by = "id")
+######################################################################
+
+
 #Used write_rds() to write out vertical world data into a separate rds file
 write_rds(vertical_world, "Korea/world.rds")
 write_rds(gender_data_vertical, "Korea/gender.rds")
 write_rds(age_data, "Korea/age.rds")
 write_rds(world, "Korea/worldMap.rds")
+write_rds(joined, "Korea/koreaMap.rds")

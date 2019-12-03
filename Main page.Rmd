@@ -18,7 +18,7 @@ library(stringr)
 ```
 
 ```{r}
-x <- read_xlsx("raw-data/2015_Religions_Korea.xlsx") %>% 
+x <- read_xlsx("Korea/raw-data/2015_Religions_Korea.xlsx") %>% 
   clean_names()
 
 #fixes merged column problem from excel for the dataset
@@ -66,8 +66,17 @@ gender_data_vertical<- gender_data_vertical %>%
                                str_c(key, "F"),
                                str_c(key, "M")))
 
-gender_data_vertical <- transform(gender_data_vertical, value = as.numeric(value))
+gender_data_vertical <- transform(gender_data_vertical, value = as.numeric(value)) 
 
+gender_data_vertical<- gender_data_vertical%>% 
+  arrange(desc(value))
+
+
+ggplot(gender_data_vertical,aes(x = reorder(as.factor(religion),value), y = value, fill = gender)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  scale_fill_manual(values = c("#FF5733","#15C9C1")) +
+  labs(title = "Male and Female Religous Data", x = "Religions", y = "Percentage Practiced by Population")
 
 
 gender <- ggplot(gender_data_vertical, aes(x = reorder(as.factor(religion),value), y = value, fill = gender)) +       
