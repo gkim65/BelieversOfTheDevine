@@ -18,11 +18,13 @@ library(stringr)
 ```
 
 ```{r}
+
 x <- read_xlsx("Korea/raw-data/2015_Religions_Korea.xlsx") %>% 
   clean_names()
 
 #fixes merged column problem from excel for the dataset
 test<- x %>% fill(gender) %>% fill(korean_region)
+
 
 world<- read_csv("raw-data/World_Religion_Data.csv", col_types = cols(
   Country = col_character(),
