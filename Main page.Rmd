@@ -153,16 +153,16 @@ summarize(christianity = mean(as.numeric(christian))) %>% DONT LOOK DOWN HERE:
 
 ```{r OLD data cleaning}
 
-korean_migration_data<- read_excel("raw-data/LongTerm_International_Migration_by_Sex_and_Age_Nationals__Foreigners__20191005095057.xlsx") %>% clean_names()
+korean_migration_data<- read_excel("Korea/raw-data/LongTerm_International_Migration_by_Sex_and_Age_Nationals__Foreigners__20191005095057.xlsx") %>% clean_names()
 
 ```
 
 ```{r OLD Bar Graph}
 # Need to sort out my data first in order to make the grouped barchart
 
-expanded_korean<- korean_migration_data %>% 
-  filter(by_gender !="Total") %>%
-  filter(by_age !="unknown",by_age!="Total") %>%
+expanded_korean <- korean_migration_data %>% 
+  filter(by_gender != "Total") %>%
+  filter(by_age != "unknown", by_age!="Total") %>%
   
   # Filtered out total and unknowns since that was the duplicate of the combined data
   
@@ -177,6 +177,7 @@ expanded_korean<- korean_migration_data %>%
 
   # made a column that would allow me to duplicate each row
 
+expanded_korean
 expanded_korean <- expanded_korean[rep(row.names(expanded_korean),
                                        expanded_korean$freq), 1:4]
 
