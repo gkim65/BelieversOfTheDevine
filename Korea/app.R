@@ -62,7 +62,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
         
         tabsetPanel(
             
-            # Religion mapping tab for the world page
+            #### LEAFLET Religion mapping tab for the world page ####
             
             tabPanel("Interactive Religion Mapping",
                      
@@ -112,7 +112,8 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                          style = "opacity: 0.92"
                          ))
                     ,
-                        
+             
+             #### BarPlot ####            
             
              tabPanel("The World V.S. South Korea",
                       
@@ -137,6 +138,8 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                          world.")
                       ),
             
+            #### Time Line of South Korean Religions #####
+            
             tabPanel("South Korea Trends Over Time",
                      
                      # Only one graph within this panel
@@ -146,15 +149,16 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                      # Need to give a slight explanation
                      
                      h5("I wanted to explore the various changes in the various religious populations
-                        of two specific religions: Christianity and Buddhism. I understood that the 
-                        Christian population had increased with the increasing influence and power
-                        that western nations in South Korea, but did not know how this affected Buddhism:
+                        of two specific religions: Christianity and Buddhism. I understood that the number of followers 
+                        of the Christian faith had increased with the increasing influence and power
+                        that western nations in South Korea, but did not know how this affected Buddhism's followings:
                         one of the largest religious populations in South Korea. "),
-                     h5("While Protestant Christianity and no religious populations seem to be on the rise,
+                     h5("While Protestant Christianity and populations not affilated with a religion seem to be on the rise,
                         in the post millenial time period, the levels of Buddhism and Catholic Christianity 
-                        are seen to decrease during this time period. These sudden changes are mainly seen in
+                        are seen to decrease in relation to these numbers. These sudden changes are mainly seen in
                         the beginning of the 2000s, moving into the 2015s breaking the steady trends starting from
-                        1985 to 2000s.")
+                        1985 to 2000s. Many more conclusions could have been deducted with access to more thorough data
+                        in previous years, but the Korean Census did not seem to be this through until the late 20th century.")
             )
              )),
     
@@ -166,6 +170,8 @@ ui <- fluidPage(theme = shinytheme("flatly"),
         
         tabsetPanel(
             
+            #### Gender tab ####
+            
              tabPanel("Gender",
                       fluidRow(
                           style = "max-height: 80vh; overflow-y: auto;", 
@@ -173,16 +179,32 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                       h3("Male and Female Religous Data"),
                       plotOutput(outputId = "genderPlot"),
                       
-                      h5("In this grouped percentage based gender religion plot, many more South 
-                         Korean females are found to practice religion than their male counterparts. 
-                         The only sections that South Korean males pass the 50% mark against females
+                      h5("In this grouped bar percentage plot above, the differences of religous followers
+                         based on gender in South Korea is listed from the 2015 Korean Census Data. From this
+                         graphic, it is clear that many more South 
+                         Korean females are found to practice various religions than their male counterparts. 
+                         The only sections that South Korean males pass the 50% mark against the South Korean 
+                         female population is in the non-religiously affiliated groups, and Confucianism. 
+                         Confucianism is mainly viewed as a practice of principles to develop moral systems, 
+                         social relationships between young and old, and guide the ways of life; it is not 
+                         necessarily viewed as a spiritual religion like Christianity or Islam. Within the 
+                         various principles practiced within Confucianism, it is important to note that 
+                         patriarchial values are also encouraged such as having the respect for the first
+                         male of the family - upholding the hierachy of fathers and sons being on higher 
+                         on the scale compared to the female members of the family.
                          "),
                       # And a number representative bar graph plot
+                      plotOutput(outputId = "gender2Plot"),
                       
-                      plotOutput(outputId = "gender2Plot")
+                      h5("This plot is a more representative distribution of the actual population numbers
+                         of the various religions practiced in South Korea. The numbers of the non religiously 
+                         affiliated groups are definitely high in the 15 millions, with other religions following
+                         suit mostly in the 2 million to 5 million range.")
                       
                       )),
              
+            #### Age Tab ####
+            
             tabPanel("Age",
                      
                      # Age tab for the demographics page
@@ -206,7 +228,18 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                                         "Christianity Protestant" = "christianity_protestant",
                                         "Christianity Catholic" = "christianity_catholic",
                                         "No Religion" = "no_religion"))
-                     )),
+                     ),
+                     h5("The quadratic regression plotted against these age bar graphs show a trend of 
+                        South Korean individuals practicing more religion in their 30s to 60s, an age when
+                        they would have become more established with their beliefs and moral principles to
+                        seek out a religion they would identify with. For youth and adolescents younger than
+                        18, as well as older generations past 70, the numbers of individuals that practice 
+                        religion significantly decrease causing the creation of a small bell shaped curve.
+                        This is slightly different in the Christianity Protestant tab, where there is a large
+                        following starting from the younger generations continuing into the middle years; 
+                        there is the same drop in the older generation however in this religious population 
+                        as well.")
+                     ),
                      
                      # Plot that comes out of it is based on the variable that the
                      # user chooses from the select tool
@@ -215,8 +248,11 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                          plotOutput(outputId = "agePlot")
                      )
                      ),
+            
+            #### South Korean Geographic Maps Panel ####
+            
                 tabPanel("Geographic Regions of South Korea",
-
+                            
                                selectInput("imageMap",
                                            "Religion:", 
                                            
@@ -236,10 +272,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                                
                                h5("Choose from this dropdown menu to explore the religious makeup of the 
                                   various administrative regions in South Korea."),
-                         
-                         fillPage(fillRow(imageOutput("imagePop"),
-                                          imageOutput("imageReligions")
-                         ))
+                         fluidRow(column(width = 6,imageOutput("imagePop")),column(width = 6,imageOutput("imageReligions")))
                            
                          
                 )
@@ -257,8 +290,15 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                      h3("The Data"),
                      h5("These graphics were created based on data from both the Pew Research Center's",
                         a("The Global Religious Landscape", href="https://www.pewforum.org/2012/12/18/global-religious-landscape-exec/"), 
-                        " , as well as the KOSIS KOrean Statistical Information Service's ", a("2015 Gender/Age/Religion Survey", 
-                        href="http://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1PM1502&conn_path=I2")),
+                        " , as well as the KOSIS KOrean Statistical Information Service's ", a("2015", 
+                        href="http://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1PM1502&conn_path=I2"), 
+                        a("2005", 
+                          href="http://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1IN0505&conn_path=I2"),
+                        a("1995", 
+                          href="http://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1IN9506&conn_path=I2"),
+                        a("1985",
+                          href = "http://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1IN8505&conn_path=I2"),
+                        " Gender/Age/Religion Surveys."),
                      
                      # Ensure that the minimum relevant background is provided to
                      # understand what is being presented
@@ -512,7 +552,7 @@ server <- function(input, output, session) {
     })    
     
     #### Korea Map Images ####
-    
+
     output$imagePop <- renderImage(
         
         # image of the ggplot map for the population density in South Korea

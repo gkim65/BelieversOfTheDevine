@@ -5,7 +5,12 @@ date: "11/28/2019"
 output: html_document
 ---
 
+This R markdown was used to practice the various ggplot mappings of the South Korean peninsula, and create the base images needed for the shiny app that moved through the various density maps of the different religous populations in Korea. 
+
 ```{r setup, include=FALSE}
+
+# need all of our libraries!
+
 knitr::opts_chunk$set(echo = TRUE)
 require(rgdal)
 library(ggplot2)
@@ -23,15 +28,18 @@ library(scales)
 x <- read_xlsx("Korea/raw-data/2015_Religions_Korea.xlsx") %>% 
   clean_names()
 
+# need to clean the data for only the numbers in each religous group
+
 clean <- x %>% 
   filter(gender == "Total") %>% 
   tail(17) %>% 
   select(-matches("age")) %>% 
   select(-matches("gender"))
 
+# change column name of region names to id for joining the various datasets later
+
 colnames(clean)[1]<-"id"
 
-clean
 ############################################################# 
 ############### START OF SHAPEFILE STUFF ####################
 #############################################################
@@ -45,6 +53,7 @@ shp_df<- tidy(shp, region = "NAME_1")
 head(shp_df)
 
 joined <- inner_join(shp_df,clean, by = "id")
+joined
 #shp@data <- inner_join(shp@data,clean, by = "NAME_1")
 #shp@data
 ```
@@ -52,6 +61,8 @@ joined <- inner_join(shp_df,clean, by = "id")
 
 
 ```{r Mapping}
+# create all the various images for the shiny app
+
 png("Korea/graphics/populationKorea.png")
 png("Korea/graphics/allReligionsKorea.png")
 png("Korea/graphics/buddhismKorea.png")
@@ -62,9 +73,16 @@ png("Korea/graphics/confucianismKorea.png")
 png("Korea/graphics/cheondoismKorea.png")
 png("Korea/graphics/noReligionKorea.png")
 
+# need a dataframe that has only the names of the various south korea administrative 
+# regions
 
-# geom polygon to plot the graph in ggplot :D
-# filled by id which we found through head, just the different regions of korea
+cnames <- aggregate(cbind(long, lat) ~ id, data=joined, 
+                    FUN=function(x)mean((x)))
+
+# geom polygon to plot the map in ggplot :D
+# needed to group each administrative regions by group
+# just made completely separate maps for every image
+
 ggplot() + 
   geom_polygon(data = joined, 
                aes(x = long, 
@@ -74,13 +92,16 @@ ggplot() +
                colour = "white",
                size=0, 
                alpha=0.9) + 
-  scale_fill_gradient2(low = "red",
-                       mid = scales::muted("purple"),
-                       high = "blue",
+  scale_fill_gradient2(low = "white",
+                       mid = scales::muted("light blue"),
+                       high = "purple",
                        labels = comma) +
   theme_void() +
   labs(title = "South Korea population density based on geographic region",
-       fill = "Population")
+       fill = "Population")+
+  geom_label(data = cnames, aes(x=long, y=lat, label=id),size = 1.5) 
+#  geom_text(data = cnames,aes(long, lat, label = id), size=2)
+
 ggsave("Korea/graphics/populationKorea.png")
 
 # Religious Total
@@ -93,9 +114,9 @@ ggplot() +
                colour = "white",
                size=0, 
                alpha=0.9) + 
-  scale_fill_gradient2(low = "red",
-                       mid = scales::muted("purple"),
-                       high = "blue",
+  scale_fill_gradient2(low = "white",
+                       mid = scales::muted("light blue"),
+                       high = "purple",
                        labels = comma) +
   theme_void() +
   labs(title = "Population of religious individuals based on geographic region",
@@ -112,9 +133,9 @@ ggplot() +
                colour = "white",
                size=0, 
                alpha=0.9) + 
-  scale_fill_gradient2(low = "red",
-                       mid = scales::muted("purple"),
-                       high = "blue",
+  scale_fill_gradient2(low = "white",
+                       mid = scales::muted("light blue"),
+                       high = "purple",
                        labels = comma) +
   theme_void() +
   labs(title = "Population of Buddhists based on geographic region",
@@ -131,9 +152,9 @@ ggplot() +
                colour = "white",
                size=0, 
                alpha=0.9) + 
-  scale_fill_gradient2(low = "red",
-                       mid = scales::muted("purple"),
-                       high = "blue",
+  scale_fill_gradient2(low = "white",
+                       mid = scales::muted("light blue"),
+                       high = "purple",
                        labels = comma) +
   theme_void() +
   labs(title = "Population of Protestant Christians based on geographic region",
@@ -150,9 +171,9 @@ ggplot() +
                colour = "white",
                size=0, 
                alpha=0.9) + 
-  scale_fill_gradient2(low = "red",
-                       mid = scales::muted("purple"),
-                       high = "blue",
+  scale_fill_gradient2(low = "white",
+                       mid = scales::muted("light blue"),
+                       high = "purple",
                        labels = comma) +
   theme_void() +
   labs(title = "Population of Catholic Christians based on geographic region",
@@ -169,9 +190,9 @@ ggplot() +
                colour = "white",
                size=0, 
                alpha=0.9) + 
-  scale_fill_gradient2(low = "red",
-                       mid = scales::muted("purple"),
-                       high = "blue",
+  scale_fill_gradient2(low = "white",
+                       mid = scales::muted("light blue"),
+                       high = "purple",
                        labels = comma) +
   theme_void() +
   labs(title = "Population of Won Buddhists based on geographic region",
@@ -188,9 +209,9 @@ ggplot() +
                colour = "white",
                size=0, 
                alpha=0.9) + 
-  scale_fill_gradient2(low = "red",
-                       mid = scales::muted("purple"),
-                       high = "blue",
+  scale_fill_gradient2(low = "white",
+                       mid = scales::muted("light blue"),
+                       high = "purple",
                        labels = comma) +
   theme_void() +
   labs(title = "Population of Confucianists based on geographic region",
@@ -208,9 +229,9 @@ ggplot() +
                colour = "white",
                size=0, 
                alpha=0.9) + 
-  scale_fill_gradient2(low = "red",
-                       mid = scales::muted("purple"),
-                       high = "blue",
+  scale_fill_gradient2(low = "white",
+                       mid = scales::muted("light blue"),
+                       high = "purple",
                        labels = comma) +
   theme_void() +
   labs(title = "Population of Cheondoists based on geographic region",
@@ -228,9 +249,9 @@ ggplot() +
                colour = "white",
                size=0, 
                alpha=0.9) + 
-  scale_fill_gradient2(low = "red",
-                       mid = scales::muted("purple"),
-                       high = "blue",
+  scale_fill_gradient2(low = "white",
+                       mid = scales::muted("light blue"),
+                       high = "purple",
                        labels = comma) +
   theme_void() +
   labs(title = "Population of non-religious individuals based on geographic region",
