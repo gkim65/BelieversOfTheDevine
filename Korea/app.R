@@ -86,7 +86,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                                    h3("Religion makeup based on country"),
                                    
                                    selectInput("region",
-                                     "Religion:", 
+                                     "Religions in 2012:", 
                                      
                                      # Needed to specify the various religions you can
                                      # choose, had them equal the various variables for
@@ -118,7 +118,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
              tabPanel("The World V.S. South Korea",
                       
                       # Only one graph within this panel
-                          h2("The Religions of the World vs. South Korea"),
+                          h2("The Religions of the World vs. South Korea in 2012"),
                           plotOutput(outputId = "worldPlot"),
                       
                       # Need to give a slight explanation
@@ -271,7 +271,19 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                                ),
                                
                                h5("Choose from this dropdown menu to explore the religious makeup of the 
-                                  various administrative regions in South Korea."),
+                                  various administrative regions in South Korea. This data is also from the
+                                  2015 Korean Census; the map on the left depicts the population density of the
+                                  various administrative regions, with label names of each province. Within
+                                  the different religion population density distribution maps on the right,
+                                  Buddhism, Won Buddhism, and Confucianism have different distributions with 
+                                  having their hubs of followers towards less populated regions on the South
+                                  Korean Peninsula. Christianity on the other hand, can be seen to have
+                                  large followings in densely populated regions around the capital. This suggests
+                                  the approaches of how each religion recruits their followers, and conversions from
+                                  various religions had large influences from urbanization and development in 
+                                  western nations for western religions such as Christianity, compared to more 
+                                  older standing religions such as Buddhism and Confucianism."),
+                                br(),
                          fluidRow(column(width = 6,imageOutput("imagePop")),column(width = 6,imageOutput("imageReligions")))
                            
                          
@@ -421,7 +433,7 @@ server <- function(input, output, session) {
             ggplot(age_data, aes(x = as.numeric(age_number), fill = age_number))+
                 aes_string(y = input$variable)+
                 geom_bar(stat = "identity")+
-            labs(x = "Age", y = "Population Per Religion")+
+            labs(x = "Age", y = "Population Per Religion", title = "2015 Korean Census Data: Age V.S Religion")+
             stat_smooth(method = "lm", formula = y ~ x + I(x^2), size = 1)+
             scale_y_continuous(limits = c(0,2500000),labels = comma)+
             theme(legend.position = "none") 

@@ -5,8 +5,8 @@ account: gkim65
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1511362
-bundleId: 2636944
+bundleId: 2653814
 url: https://gkim65.shinyapps.io/Korea/
-when: 1575398767.64652
+when: 1575930920.97064
 asMultiple: FALSE
 asStatic: FALSE

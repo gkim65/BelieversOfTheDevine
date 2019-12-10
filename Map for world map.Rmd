@@ -4,9 +4,13 @@ author: "Grace Kim"
 date: "11/30/2019"
 output: html_document
 ---
+This was a practice rmd for the world map leaflet, took many tries to get it fully done but it's here for everyone to enjoy!
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+# downloaded our various libraries
 
 library(leaflet)
 library(readr)
@@ -20,6 +24,7 @@ library(tidyverse)
 ```{r world map data cleaning}
 
 # Read in the world religion data
+
 world<- read_csv("Korea/raw-data/World_Religion_Data.csv", col_types = cols(
   Country = col_character(),
   Christian = col_double(),
@@ -48,12 +53,19 @@ world_spdf@data[world_spdf@data$ISO2 == "AX","NAME"] <- "Aland Islands"
 
 world_spdfog <- readOGR("Korea/raw-data/world_shape_file/TM_WORLD_BORDERS_SIMPL-0.3.shp", stringsAsFactors = F)
 
+# joined the various religion data of the world with the shp file
+
 world_spdf@data <- inner_join(world_spdf@data,world,by = "NAME")
 
 ```
 
 ```{r mappy time}
+# created the yellow green blue color palette for the leaflet map
+
 pal <- colorNumeric("YlGnBu", world_spdf@data$christian)
+
+# the text popup labels for every country
+# lists the religious percentages and the population and country name
 
 mytext <- paste(
     "Country: ", world_spdf@data$NAME,"<br/>", 
@@ -62,9 +74,15 @@ mytext <- paste(
     sep="") %>%
   lapply(htmltools::HTML)
 
+# actual leaflet!!!
+# added the various nation tiles and the setview to the specific region on the map
+
 leaflet(world_spdf)%>% 
   addTiles()%>%
   setView(lat=10, lng=0 , zoom=2) %>%
+  
+  # each polygon shape for each nation is noted below
+  
   addPolygons(stroke = FALSE, 
               fillOpacity = 0.9, 
               smoothFactor = 0.5, 
@@ -75,72 +93,25 @@ leaflet(world_spdf)%>%
                 textsize = "13px", 
                 direction = "auto"
             )) %>% 
+  
+  # legend for the various religious scales on the bottom right
+  
   addLegend("bottomright", 
             pal = pal, 
             values = ~christian,
             title = "Religion",
             opacity = 1)
-
-
-
-```
-
-```{r}
-world_spdfog@data$POP2005[ which(world_spdfog@data$POP2005 == 0)] = NA
-world_spdfog@data$POP2005 <- as.numeric(as.character(world_spdfog@data$POP2005)) / 1000000 %>% round(2)
-pal <- colorNumeric("YlGnBu", world_spdfog@data$POP2005)
-
-mytext <- paste(
-    "Country: ", world_spdfog@data$NAME,"<br/>", 
-    "Population: ", round(as.numeric(as.character(world_spdfog@data$POP2005)), 2), 
-    sep="") %>%
-  lapply(htmltools::HTML)
-
-leaflet(world_spdfog)%>% 
-  addTiles()%>%
-  setView(lat=10, lng=0 , zoom=2) %>%
-  addPolygons(stroke = FALSE, 
-              fillOpacity = 0.9, 
-              smoothFactor = 0.5, 
-              color = ~pal(POP2005),
-              label = mytext,
-              labelOptions = labelOptions( 
-                style = list("font-weight" = "normal", padding = "3px 8px"), 
-                textsize = "13px", 
-                direction = "auto"
-            )) %>% 
-  addLegend("bottomright", 
-            pal = pal, 
-            values = ~POP2005,
-            title = "Religion",
-            opacity = 1)
-
 ```
 
 
 ```{r}
-world_spdfog@data$NAME[!( world_spdfog@data$NAME %in% world$NAME)]
-world_spdfog@data[141,"NAME"] <- "Aland Islands"
-
-> world_spdfog@data[world_spdfog@data$ISO2 == "AX","NAME"] <- "Aland Islands"
-
-summary(world_spdfog@data$NAME)
-summary(world_spdf@data$NAME)
-
-
-output$worldMapPlot <- renderLeaflet({map %>%
-            setView(lat=10, lng=0, zoom=3)%>%
-            addPolygons(stroke = FALSE, 
-                        fillOpacity = 0.5, 
-                        smoothFactor = 0.5, 
-                        color = ~colorNumeric("YlOrRd", colorReligion)(colorReligion))%>%
-            addLegend("bottomleft", 
-                       pal = ~colorNumeric("YlOrRd", colorReligion),
-                       values = ~colorReligion)
-```
-```{r}
+# practice graph for the world v.s. south korea grouped barplot
+# use the rds file from the data cleaning rscript
 
 vertical_world =  read_rds("Korea/world.rds")
+
+# not much data wrangling from here, just need to use ggplot and have the groups set
+# using geom_bar position dodge and etc.
 
 ggplot(vertical_world, aes(x = key, y=value, fill = country))+ 
             geom_bar(position="dodge", stat="identity")+

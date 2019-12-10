@@ -5,8 +5,12 @@ date: "11/13/2019"
 output: html_document
 ---
 
+This was a practice document for the initial creation of all the various graphics in this project. This contains many of the bar graphs for Gender, Age, and the world v.s. south korea bargraph.
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+
+# Need all of the libraries!
 
 library(tidyverse)
 library(readxl)
@@ -18,15 +22,19 @@ library(stringr)
 ```
 
 ```{r}
+# 2015 south Korea census data
 
 x <- read_xlsx("Korea/raw-data/2015_Religions_Korea.xlsx") %>% 
   clean_names()
 
 #fixes merged column problem from excel for the dataset
+
 test<- x %>% fill(gender) %>% fill(korean_region)
 
+# Data from world peabody research center, has numbers of every nations various religious
+# populations data needed to set the various column attributes as its a csv
 
-world<- read_csv("raw-data/World_Religion_Data.csv", col_types = cols(
+world<- read_csv("Korea/raw-data/World_Religion_Data.csv", col_types = cols(
   Country = col_character(),
   Christian = col_double(),
   Muslim = col_double(),
@@ -51,14 +59,18 @@ gender_data <- x %>%
   filter(age == "Total")
 
 #needs to be a data frame in order to use gather
+
 gender_data <- data.frame(gender_data)
 
 #gather flips the rows and columns
+
 gender_data_vertical <- gather(gender_data)
 
+# take only the columns we need for the grouped plot
 
 gender_data_vertical <- gender_data_vertical[11:30,] 
 
+# formatting for the various column names
 
 gender_data_vertical<- gender_data_vertical %>% 
   mutate(gender = ifelse(row_number()%%2 == 0,
@@ -68,11 +80,18 @@ gender_data_vertical<- gender_data_vertical %>%
                                str_c(key, "F"),
                                str_c(key, "M")))
 
+# add the necessary row numbers needed
+
 gender_data_vertical <- transform(gender_data_vertical, value = as.numeric(value)) 
+
+# arranged from desc
 
 gender_data_vertical<- gender_data_vertical%>% 
   arrange(desc(value))
 
+# plotted the percentages of the different gender groups that practice each religion
+# filled the entire chart so it could be a percentage based approximation so we could
+# compare each religious group on a normalized scale
 
 ggplot(gender_data_vertical,aes(x = reorder(as.factor(religion),value), y = value, fill = gender)) +
   geom_bar(stat = "identity") +
@@ -100,6 +119,10 @@ gender
 ```
 
 ```{r Age line graphs}
+# data cleaning for age to get only the total populations of each age,
+# needed to make sure age was a numeric variable as well by only taking the first
+# two characters of the row names
+
 age_data <- x %>% 
   filter(korean_region == "All of Korea") %>% 
   filter(age != "Total") %>% 
@@ -112,6 +135,9 @@ age_data <- x %>%
 quadratic.model <- lm(data = age_data, religious_total ~ age_number + age2)
 summary(quadratic.model)
 
+# had a age plot with a quadratic modeled on top of it so that we can see the trends
+# as the religious populations move within generations
+
 ggplot(age_data, aes(x = as.numeric(age_number), y = religious_total, fill = age_number)) +
   geom_bar(stat = "identity")+
   stat_smooth(method = "lm", formula = y ~ x + I(x^2), size = 1)
@@ -119,6 +145,8 @@ ggplot(age_data, aes(x = as.numeric(age_number), y = religious_total, fill = age
 
 
 ```{r World Religions}
+# summarized all the percentages of the nations around the world
+
 world_summary<- world %>% 
   summarize(christian = mean(as.numeric(christian)),
             muslim = mean(as.numeric(muslim)),
@@ -129,14 +157,23 @@ world_summary<- world %>%
             other = mean(as.numeric(other)),
             jewish = mean(as.numeric(jewish))) 
 
+# took the korea totals from the world dataset
+
 korea_totals <- world %>% 
   filter(country == "South Korea") %>% 
   select(-matches("country"))
 
+# merged the two world summary and korea totals data together
+
 world_korea_summary <- rbind(data.frame(world_summary),data.frame(korea_totals))
+
+# changed rows and columns because of the grouped bar plot format we needed
 
 vertical_world <- gather(world_korea_summary)%>% 
   mutate(country = ifelse(row_number()%%2 == 1, "World","South Korea"))
+
+# grouped barplot to show the various religious follower populations between south Korea
+# v.s. the rest of the world
 
 ggplot(vertical_world, aes(x = key, y=value, fill = country))+ 
   geom_bar(position="dodge", stat="identity")+

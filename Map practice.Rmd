@@ -25,6 +25,7 @@ library(scales)
 
 ```{r Data cleaning}
 # read in the korea religions dataset :D
+
 x <- read_xlsx("Korea/raw-data/2015_Religions_Korea.xlsx") %>% 
   clean_names()
 
@@ -44,11 +45,12 @@ colnames(clean)[1]<-"id"
 ############### START OF SHAPEFILE STUFF ####################
 #############################################################
 
-
 # Read in Shape files of the korean administrative area boundaries
+
 shp <- readOGR("Korea/raw-data/KOR_adm/KOR_adm1.shp", stringsAsFactors = F)
 
 # tidyed the data for the region :D, need the region name so that the longitude data points match up the various busan seoul other area names 
+
 shp_df<- tidy(shp, region = "NAME_1")
 head(shp_df)
 
@@ -83,8 +85,14 @@ cnames <- aggregate(cbind(long, lat) ~ id, data=joined,
 # needed to group each administrative regions by group
 # just made completely separate maps for every image
 
+
+#### POPULATION DENSITY MAP  ####
+
 ggplot() + 
-  geom_polygon(data = joined, 
+
+  # add the various geometric shapes for the different korean regions
+  
+    geom_polygon(data = joined, 
                aes(x = long, 
                   y = lat, 
                   group = group, 
@@ -92,6 +100,9 @@ ggplot() +
                colour = "white",
                size=0, 
                alpha=0.9) + 
+  
+  # gradient scale for purple to be higher dense regions, blue/white lower scale
+  
   scale_fill_gradient2(low = "white",
                        mid = scales::muted("light blue"),
                        high = "purple",
@@ -102,10 +113,14 @@ ggplot() +
   geom_label(data = cnames, aes(x=long, y=lat, label=id),size = 1.5) 
 #  geom_text(data = cnames,aes(long, lat, label = id), size=2)
 
-ggsave("Korea/graphics/populationKorea.png")
+ggsave("Korea/graphics/populationKorea.png",width = 7, height = 7)
 
-# Religious Total
+#### Religious Total ####
+
 ggplot() + 
+  
+    # add the various geometric shapes for the different korean regions
+  
   geom_polygon(data = joined, 
                aes(x = long, 
                   y = lat, 
@@ -114,6 +129,9 @@ ggplot() +
                colour = "white",
                size=0, 
                alpha=0.9) + 
+  
+    # gradient scale for purple to be higher dense regions, blue/white lower scale
+  
   scale_fill_gradient2(low = "white",
                        mid = scales::muted("light blue"),
                        high = "purple",
@@ -121,10 +139,14 @@ ggplot() +
   theme_void() +
   labs(title = "Population of religious individuals based on geographic region",
        fill = "Population")
-ggsave("Korea/graphics/allReligionsKorea.png")
+ggsave("Korea/graphics/allReligionsKorea.png",width = 7, height = 7)
 
-# Buddhism map
+#### Buddhism map ####
+
 ggplot() + 
+  
+    # add the various geometric shapes for the different korean regions
+  
   geom_polygon(data = joined, 
                aes(x = long, 
                   y = lat, 
@@ -133,6 +155,9 @@ ggplot() +
                colour = "white",
                size=0, 
                alpha=0.9) + 
+  
+    # gradient scale for purple to be higher dense regions, blue/white lower scale
+  
   scale_fill_gradient2(low = "white",
                        mid = scales::muted("light blue"),
                        high = "purple",
@@ -140,10 +165,14 @@ ggplot() +
   theme_void() +
   labs(title = "Population of Buddhists based on geographic region",
        fill = "Population")
-ggsave("Korea/graphics/buddhismKorea.png")
+ggsave("Korea/graphics/buddhismKorea.png",width = 7, height = 7)
 
-# Christian Protestant map
+##### Christian Protestant map ####
+
 ggplot() + 
+  
+    # add the various geometric shapes for the different korean regions
+  
   geom_polygon(data = joined, 
                aes(x = long, 
                   y = lat, 
@@ -152,6 +181,9 @@ ggplot() +
                colour = "white",
                size=0, 
                alpha=0.9) + 
+  
+    # gradient scale for purple to be higher dense regions, blue/white lower scale
+  
   scale_fill_gradient2(low = "white",
                        mid = scales::muted("light blue"),
                        high = "purple",
@@ -159,10 +191,14 @@ ggplot() +
   theme_void() +
   labs(title = "Population of Protestant Christians based on geographic region",
        fill = "Population")
-ggsave("Korea/graphics/christProtesKorea.png")
+ggsave("Korea/graphics/christProtesKorea.png",width = 7, height = 7)
 
-# Christian Catholic map
+#### Christian Catholic map ####
+
 ggplot() + 
+  
+    # add the various geometric shapes for the different korean regions
+  
   geom_polygon(data = joined, 
                aes(x = long, 
                   y = lat, 
@@ -171,17 +207,24 @@ ggplot() +
                colour = "white",
                size=0, 
                alpha=0.9) + 
-  scale_fill_gradient2(low = "white",
+
+    # gradient scale for purple to be higher dense regions, blue/white lower scale
+  
+    scale_fill_gradient2(low = "white",
                        mid = scales::muted("light blue"),
                        high = "purple",
                        labels = comma) +
   theme_void() +
   labs(title = "Population of Catholic Christians based on geographic region",
        fill = "Population")
-ggsave("Korea/graphics/christCathKorea.png")
+ggsave("Korea/graphics/christCathKorea.png",width = 7, height = 7)
 
-# Won Buddhism map
+#### Won Buddhism map ####
+
 ggplot() + 
+  
+    # add the various geometric shapes for the different korean regions
+  
   geom_polygon(data = joined, 
                aes(x = long, 
                   y = lat, 
@@ -190,6 +233,9 @@ ggplot() +
                colour = "white",
                size=0, 
                alpha=0.9) + 
+  
+    # gradient scale for purple to be higher dense regions, blue/white lower scale
+  
   scale_fill_gradient2(low = "white",
                        mid = scales::muted("light blue"),
                        high = "purple",
@@ -197,11 +243,15 @@ ggplot() +
   theme_void() +
   labs(title = "Population of Won Buddhists based on geographic region",
        fill = "Population")
-ggsave("Korea/graphics/wonBuddhismKorea.png")
+ggsave("Korea/graphics/wonBuddhismKorea.png",width = 7, height = 7)
 
-# Confucianism map
+#### Confucianism map ####
+
 ggplot() + 
-  geom_polygon(data = joined, 
+
+    # add the various geometric shapes for the different korean regions
+  
+    geom_polygon(data = joined, 
                aes(x = long, 
                   y = lat, 
                   group = group, 
@@ -209,6 +259,9 @@ ggplot() +
                colour = "white",
                size=0, 
                alpha=0.9) + 
+  
+    # gradient scale for purple to be higher dense regions, blue/white lower scale
+  
   scale_fill_gradient2(low = "white",
                        mid = scales::muted("light blue"),
                        high = "purple",
@@ -216,12 +269,16 @@ ggplot() +
   theme_void() +
   labs(title = "Population of Confucianists based on geographic region",
        fill = "Population")
-ggsave("Korea/graphics/confucianismKorea.png")
+ggsave("Korea/graphics/confucianismKorea.png",width = 7, height = 7)
 
 
-# Confucianism map
+#### Confucianism map ####
+
 ggplot() + 
-  geom_polygon(data = joined, 
+
+    # add the various geometric shapes for the different korean regions
+  
+    geom_polygon(data = joined, 
                aes(x = long, 
                   y = lat, 
                   group = group, 
@@ -236,12 +293,16 @@ ggplot() +
   theme_void() +
   labs(title = "Population of Cheondoists based on geographic region",
        fill = "Population")
-ggsave("Korea/graphics/cheondoismKorea.png")
+ggsave("Korea/graphics/cheondoismKorea.png",width = 7, height = 7)
 
 
-# no religion map
+#### no religion map ####
+
 ggplot() + 
-  geom_polygon(data = joined, 
+
+    # add the various geometric shapes for the different korean regions
+  
+    geom_polygon(data = joined, 
                aes(x = long, 
                   y = lat, 
                   group = group, 
@@ -249,6 +310,9 @@ ggplot() +
                colour = "white",
                size=0, 
                alpha=0.9) + 
+  
+    # gradient scale for purple to be higher dense regions, blue/white lower scale
+  
   scale_fill_gradient2(low = "white",
                        mid = scales::muted("light blue"),
                        high = "purple",
@@ -256,7 +320,7 @@ ggplot() +
   theme_void() +
   labs(title = "Population of non-religious individuals based on geographic region",
        fill = "Population")
-ggsave("Korea/graphics/noReligionKorea.png")
+ggsave("Korea/graphics/noReligionKorea.png",width = 7, height = 7)
 
 ```
 
