@@ -13,6 +13,7 @@ library(leaflet)
 library(scales)
 library(shinythemes)
 library(plotly)
+library("vembedr")
 
 
 #### DATA DOWNLOAD ####
@@ -129,7 +130,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                          was treated at an equal level, which is not representative of the number of 
                          religious followers by population."),
                       h5("However, this percentage representation lets us compare South Korea to the 
-                         other religous makeups for each nation. Interesting observations in the data 
+                         other religious makeups for each nation. Interesting observations in the data 
                          are the large numbers of unaffiliated individuals with religion in South Korea
                          in contrast to the rest of the nations in the world. There is also a large 
                          Buddhist population, which is understandable seeing as South Korea is in the
@@ -153,8 +154,8 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                         of the Christian faith had increased with the increasing influence and power
                         that western nations in South Korea, but did not know how this affected Buddhism's followings:
                         one of the largest religious populations in South Korea. "),
-                     h5("While Protestant Christianity and populations not affilated with a religion seem to be on the rise,
-                        in the post millenial time period, the levels of Buddhism and Catholic Christianity 
+                     h5("While Protestant Christianity and populations not affiliated with a religion seem to be on the rise,
+                        in the post millennial time period, the levels of Buddhism and Catholic Christianity 
                         are seen to decrease in relation to these numbers. These sudden changes are mainly seen in
                         the beginning of the 2000s, moving into the 2015s breaking the steady trends starting from
                         1985 to 2000s. Many more conclusions could have been deducted with access to more thorough data
@@ -284,6 +285,9 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                                   western nations for western religions such as Christianity, compared to more 
                                   older standing religions such as Buddhism and Confucianism."),
                                 br(),
+                         
+                         # have two images on the same row on the screen
+                         
                          fluidRow(column(width = 6,imageOutput("imagePop")),column(width = 6,imageOutput("imageReligions")))
                            
                          
@@ -297,9 +301,16 @@ ui <- fluidPage(theme = shinytheme("flatly"),
     
         tabPanel("About",
 
-                     # Provided information about the project itself and data sources
+                 # added the video from youtube onto my project
                      
-                     h3("The Data"),
+                     h3("Video Runthrough of Shiny App"),
+                     embed_url("https://youtu.be/ErgIM3U3B-Y"),
+                     
+                     h5("Click", a("here", href = "https://drive.google.com/file/d/1ezpWhzDAOZhSHSxx8U0w6nRbe12tt1Ig/view"), " to read my
+                        paper that explains more in detail about this project!"),
+                 # Provided information about the project itself and data sources
+                 
+                 h3("The Data"),
                      h5("These graphics were created based on data from both the Pew Research Center's",
                         a("The Global Religious Landscape", href="https://www.pewforum.org/2012/12/18/global-religious-landscape-exec/"), 
                         " , as well as the KOSIS KOrean Statistical Information Service's ", a("2015", 
@@ -321,8 +332,8 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                         west and the surviving cultural traditions of the Korean people."),
                      h5("Due to the scope and timeframe of this project, it was not possible to explore 
                         all the various factors that could affect religion, but I was able to see the 
-                        affects age, gender, and region could have on the various religions that individuals
-                        proacticed."),
+                        affects of age, gender, and region could have on the various religions that individuals
+                        practiced."),
                      
                      # Include information about me so they can know who wrote the project
                      
@@ -338,8 +349,11 @@ ui <- fluidPage(theme = shinytheme("flatly"),
                      h3("Citations"),
                      h5("Table: Religious Composition by Country, in Percentages. (2017, November 16). Retrieved from https://www.pewforum.org/2012/12/18/table-religious-composition-by-country-in-percentages/."),
                      h5("성별/연령별/종교별 인구-시군구. (2015, January 5). Retrieved from http://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1PM1502&conn_path=I2."),
-                     
-                     # Include a link to the Source Code for reproducibility and credibility
+                     h5("성별/연령별/종교별 인구-시군구. (2017, January 26). Retrieved from http://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1IN0505&conn_path=I2"),
+                     h5("시도/연령/성별 종교인구. (2007, May 21). Retrieved from http://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1IN8505&conn_path=I2"),
+                     h5("행정구역/성/연령별 종교인구. (2007, May 22). Retrieved from http://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_1IN9506&conn_path=I2"), 
+                 
+                    # Include a link to the Source Code for reproducibility and credibility
                      
                      h3("Source Code"),
                      h5("The source code for this Shiny App can be found at my GitHub", 
